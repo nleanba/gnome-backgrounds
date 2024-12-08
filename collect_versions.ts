@@ -88,7 +88,22 @@ function copyBackgrounds(prev_rev: Tag, rev: Tag) {
   let hasFiles = false;
   const dittoShortnamesLater: string[] = [];
   for (const file of files) {
-    const shortname = file.name.replace(/\.[^\.]*$/, "");
+    let shortname = file.name
+      .replace(/\.[^\.]*$/, "")
+      .toLocaleLowerCase()
+      .replace("gnome-", "")
+      .replace("symbolics", "symbolic")
+      .replace("-day", "-l")
+      .replace("-night", "-d")
+      .replace("-1", "-l")
+      .replace("-2", "-d");
+    if (shortname === "brushstrokes") {
+      shortname = "brush-strokes-l";
+    } else if (shortname === "blobs") {
+      shortname = "blobs-d";
+    } else if (["brushstrokes", "disco", "vnc", "wood"].includes(shortname)) {
+      shortname += "-l";
+    }
     const indexed = index.get(shortname);
     if (changed.includes(file.path.replace("backgrounds-git/", ""))) {
       hasFiles = true;
@@ -110,17 +125,17 @@ function copyBackgrounds(prev_rev: Tag, rev: Tag) {
       dittoShortnamesLater.push(shortname);
     }
   }
-  if (hasFiles) {
-    for (const shortname of dittoShortnamesLater) {
-      const indexed = index.get(shortname);
-      if (indexed !== undefined) {
-        indexed.push(`${format(rev.sortable)}°ditto`);
-      } else {
-        index.set(shortname, [`${format(rev.sortable)}°ditto`]);
-      }
+  // if (hasFiles) {
+  for (const shortname of dittoShortnamesLater) {
+    const indexed = index.get(shortname);
+    if (indexed !== undefined) {
+      indexed.push(`${format(rev.sortable)}°ditto`);
+    } else {
+      index.set(shortname, [`${format(rev.sortable)}°ditto`]);
     }
-    revisions.push(rev);
   }
+  revisions.push(rev);
+  // }
 }
 
 const tags = getTags().sort((a, b) => compare(a.sortable, b.sortable));
@@ -189,7 +204,7 @@ for (const bg of indexArray) {
   tiles = tiles.slice(0, lastIndex + 1);
   rows.push(
     //`<div class="row" style="grid-column: ${first};">
-    `<div class="row" style="grid-column: ${first! + 1} / span ${width + 3};">
+    `<div class="row" style="grid-column: ${first! + 1} / span ${width + 4};">
      <h2>${bg[0]}</h2>${
       tiles.map((t) => {
         if (t.path === undefined) {
@@ -225,7 +240,7 @@ const html = `
       border-radius: 8px;
     }
     main {
-      grid-template-columns: max-content repeat(${revisions.length}, auto);
+      grid-template-columns: max-content auto repeat(${revisions.length}, auto);
       display: grid;
       gap: 8px;
       grid-auto-flow: row dense;
@@ -243,6 +258,7 @@ const html = `
     h2 {
       font-size: 1rem;
       margin: 0;
+      grid-column-end: span 2;
       align-self: center;
       text-align: end;
       font-weight: 400;
@@ -287,7 +303,7 @@ const html = `
     Font used is Besley* from <a href="https://indestructibletype.com/Besley.html">indestructibletype.com</a>.
   </p>
   <main>
-  <span></span><h3>${
+  <span style="grid-column-end: span 2;"></span><h3>${
   revisions.map((r) =>
     r.tag.replaceAll("GNOME_BACKRGROUNDS_", "")
       .replaceAll("GNOME_BACKGROUNDS_", "")
@@ -295,6 +311,7 @@ const html = `
   ).join("</h3><h3>")
 }</h3>
   ${rows.join("")}
+  ${ "" /* "<div></div>".repeat(2499) */}
   </main>
 </body>
 </html>
