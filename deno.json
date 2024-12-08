@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "@std/fs": "jsr:@std/fs@^1.0.6",
+    "@std/semver": "jsr:@std/semver@^1.0.3"
+  }
+}
