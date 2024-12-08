@@ -141,13 +141,15 @@ for (let index = 1; index < tags.length; index++) {
 // );
 // Deno.writeTextFileSync("index.json", indexArray);
 
-const indexArray = Array.from(index.entries()).sort(([a], [b]) =>
-  a.localeCompare(b)
-);
+const indexArray = Array.from(index.entries())
+  .sort(([a], [b]) => a.localeCompare(b));
+Deno.writeTextFileSync("index.json", JSON.stringify(indexArray));
 
 const rows: string[] = [];
 for (const bg of indexArray) {
-  const tiles: {
+  let first: number | undefined;
+  let width = 0;
+  let tiles: {
     path: string | undefined;
     ditto: number;
   }[] = [];
@@ -169,23 +171,35 @@ for (const bg of indexArray) {
           // `<img loading="lazy" src="/backgrounds-sorted/${bg[1][bgIndex]}">`,
         );
       }
+      if (first === undefined) {
+        first = index;
+      }
       bgIndex++;
-    } else {
+      width++;
+    } else if (first !== undefined) {
       tiles.push(
         { path: undefined, ditto: 1 },
         // `<div></div>`
       );
+      width++;
     }
   }
-  rows.push(`<h2>${bg[0]}</h2>${
-    tiles.map((t) => {
-      if (t.path === undefined) {
-        return `<div style="grid-column: span ${t.ditto};"></div>`;
-      }
-      // return `<img class="bg" style="grid-column: span ${t.ditto};"  loading="lazy" src="${t.path}">`;
-      return `<div class="bg" style="grid-column: span ${t.ditto};"><img loading="lazy" src="${t.path}"></div>`;
-    }).join("")
-  }`);
+  const lastIndex = tiles.findLastIndex((t) => t.path !== undefined);
+  width -= tiles.length - lastIndex + 1;
+  tiles = tiles.slice(0, lastIndex + 1);
+  rows.push(
+    //`<div class="row" style="grid-column: ${first};">
+    `<div class="row" style="grid-column: ${first! + 1} / span ${width + 3};">
+     <h2>${bg[0]}</h2>${
+      tiles.map((t) => {
+        if (t.path === undefined) {
+          return `<div style="grid-column: span ${t.ditto};"></div>`;
+        }
+        // return `<img class="bg" style="grid-column: span ${t.ditto};"  loading="lazy" src="${t.path}">`;
+        return `<div class="bg" style="grid-column: span ${t.ditto};"><img loading="lazy" src="${t.path}"></div>`;
+      }).join("")
+    }</div>`,
+  );
 }
 
 const html = `
@@ -206,44 +220,56 @@ const html = `
       font-family: "Besley Condensed", serif;
       font-weight: 400;
     }
+    div {
+      background: #dddddd;
+      border-radius: 8px;
+    }
     main {
       grid-template-columns: max-content repeat(${revisions.length}, auto);
       display: grid;
       gap: 8px;
-
-      &>div {
-        background: #dddddd;
-        border-radius: 8px;
-      }
+      grid-auto-flow: row dense;
     }
-
+    .row {
+      display: grid;
+      grid-template-columns: subgrid;
+      background: none;
+    }
     .bg {
-      margin: 28px 0;
+      margin: 38px 0;
+      height: 4px;
       position: relative;
     }
-
     h2 {
+      font-size: 1rem;
       margin: 0;
       align-self: center;
+      text-align: end;
       font-weight: 400;
+      word-break: break-all;
+      max-height: 80px;
+      line-height: 1rem;
     }
-
     h3 {
       font-size: 0.8rem;
-      max-width: 20px;
       margin: 0 auto;
       font-weight: 400;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.5);
+      width: 100%;
+      text-align: center;
     }
-
     img {
       box-shadow: 2px 2px 8px 0px #333333;
-      height: 60px;
+      height: 80px;
       /* width: 100%; */
       display: block;
       border-radius: 8px;
       /* object-fit: contain; */
       align-self: center;
-      margin: -28px 0;
+      margin: -38px 0;
       background: black;
       position: sticky;
       left: 4px;
@@ -253,6 +279,13 @@ const html = `
 </head>
 <body>
   <h1>All Gnome Backgrounds found on GitLab</h1>
+  <p>
+    This is all backgrounds found in <a href="https://gitlab.gnome.org/GNOME/gnome-backgrounds/">the gnome-backgrounds git repository</a>.
+    Each column corresponds to a git tag.
+  </p>
+  <p>
+    Font used is Besley* from <a href="https://indestructibletype.com/Besley.html">indestructibletype.com</a>.
+  </p>
   <main>
   <span></span><h3>${
   revisions.map((r) =>
