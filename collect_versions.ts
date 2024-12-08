@@ -167,7 +167,7 @@ for (const bg of indexArray) {
         }
       } else {
         tiles.push(
-          { path: `/backgrounds-sorted/${bg[1][bgIndex]}`, ditto: 1 },
+          { path: `backgrounds-sorted/${bg[1][bgIndex]}`, ditto: 1 },
           // `<img loading="lazy" src="/backgrounds-sorted/${bg[1][bgIndex]}">`,
         );
       }
