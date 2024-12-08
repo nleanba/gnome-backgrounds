@@ -91,12 +91,12 @@ function copyBackgrounds(prev_rev: Tag, rev: Tag) {
     let shortname = file.name
       .replace(/\.[^\.]*$/, "")
       .toLocaleLowerCase()
-      .replace("gnome-", "")
-      .replace("symbolics", "symbolic")
-      .replace("-day", "-l")
-      .replace("-night", "-d")
-      .replace("-1", "-l")
-      .replace("-2", "-d");
+      // .replace("gnome-", "")
+      // .replace("symbolics", "symbolic")
+      // .replace("-day", "-l")
+      // .replace("-night", "-d")
+      // .replace("-1", "-l")
+      // .replace("-2", "-d");
     if (shortname === "brushstrokes") {
       shortname = "brush-strokes-l";
     } else if (shortname === "blobs") {
@@ -204,16 +204,16 @@ for (const bg of indexArray) {
   tiles = tiles.slice(0, lastIndex + 1);
   rows.push(
     //`<div class="row" style="grid-column: ${first};">
-    `<div class="row" style="grid-column: ${first! + 1} / span ${width + 4};">
-     <h2>${bg[0]}</h2>${
+    `<div class="row" style="grid-column: ${first! + 1} / span ${width + 2};" title="${bg[0]}">
+     ${
+      // `<h2>${bg[0]}</h2>`
       tiles.map((t) => {
         if (t.path === undefined) {
           return `<div style="grid-column: span ${t.ditto};"></div>`;
         }
         // return `<img class="bg" style="grid-column: span ${t.ditto};"  loading="lazy" src="${t.path}">`;
         return `<div class="bg" style="grid-column: span ${t.ditto};"><img loading="lazy" src="${t.path}"></div>`;
-      }).join("")
-    }</div>`,
+      }).join("")}</div>`,
   );
 }
 
@@ -236,11 +236,11 @@ const html = `
       font-weight: 400;
     }
     div {
-      background: #dddddd;
+      background: #aaaaaa;
       border-radius: 8px;
     }
     main {
-      grid-template-columns: max-content auto repeat(${revisions.length}, auto);
+      grid-template-columns: repeat(${revisions.length}, auto);
       display: grid;
       gap: 8px;
       grid-auto-flow: row dense;
@@ -248,7 +248,20 @@ const html = `
     .row {
       display: grid;
       grid-template-columns: subgrid;
-      background: none;
+      background: #dddddd;
+      padding: 2px;
+      margin: -2px;
+      position: relative;
+
+      &::after {
+        content: attr(title);
+        position: absolute;
+        right: 4px;
+        bottom: 4px;
+        line-height: 1em;
+        background: #dddddd77;
+        border-radius: 2px;
+      }
     }
     .bg {
       margin: 38px 0;
@@ -274,6 +287,7 @@ const html = `
       top: 0;
       z-index: 10;
       background: rgba(255, 255, 255, 0.5);
+      border-radius: 2px;
       width: 100%;
       text-align: center;
     }
@@ -303,7 +317,8 @@ const html = `
     Font used is Besley* from <a href="https://indestructibletype.com/Besley.html">indestructibletype.com</a>.
   </p>
   <main>
-  <span style="grid-column-end: span 2;"></span><h3>${
+  <!--<span style="grid-column-end: span 2;"></span>-->
+  <h3>${
   revisions.map((r) =>
     r.tag.replaceAll("GNOME_BACKRGROUNDS_", "")
       .replaceAll("GNOME_BACKGROUNDS_", "")
@@ -311,7 +326,7 @@ const html = `
   ).join("</h3><h3>")
 }</h3>
   ${rows.join("")}
-  ${ "" /* "<div></div>".repeat(2499) */}
+  ${"" /* "<div></div>".repeat(2499) */}
   </main>
 </body>
 </html>
