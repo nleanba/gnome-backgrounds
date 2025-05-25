@@ -280,7 +280,7 @@ const html = `
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gnome Backgrounds</title>
+  <title>Gnome Backgrounds over Time</title>
   <style>
     @font-face {
       font-family: "Besley Condensed";
@@ -382,7 +382,7 @@ const html = `
     Images link to the original (except for some 2.x backgrounds, but it will at least link to the correct tag)
   </p>
   <p>
-    Font used is Besley* from <a href="https://indestructibletype.com/Besley.html">indestructibletype.com</a>.
+    Font used is Besley* Condensed by <a href="https://indestructibletype.com/Besley.html">indestructible type*</a>.
   </p>
   <main>
   <!--<span style="grid-column-end: span 2;"></span>-->
