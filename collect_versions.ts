@@ -262,7 +262,7 @@ for (const bg of indexArray) {
       // `<h2>${bg[0]}</h2>`
       tiles.map((t) => {
         if (t.path === undefined) {
-          return `<div style="grid-column: span ${t.ditto};"></div>`;
+          return `<div style="grid-column: span ${t.ditto};" title="no background with this name for this release"></div>`;
         }
         if (t.gitlab === undefined) {
           return `<a class="bg" style="grid-column: span ${t.ditto};"><img loading="lazy" src="${t.path}.png"></a>`;
@@ -281,34 +281,24 @@ const html = `
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gnome Backgrounds over Time</title>
+  <link rel="stylesheet" href="https://nleanba.ch/index.css">
   <style>
-    @font-face {
-      font-family: "Besley Condensed";
-      src: url("BesleyCondensed-Book.ttf");
-      font-weight: 400;
-      font-display: swap;
-    }
-    :root {
-      color-scheme: light dark;
-    }
-    body {
-      font-family: "Besley Condensed", serif;
-      font-weight: 400;
-    }
     div {
-      background: #aaaaaa;
+      background: var(--contrast-fg, #aaaaaa);
       border-radius: 8px;
     }
     main {
-      grid-template-columns: repeat(${revisions.length}, 120px);
+      grid-template-columns: repeat(49, 120px);
       display: grid;
       gap: 12px;
       grid-auto-flow: row dense;
+      max-width: unset;
+      font-stretch: 75%;
     }
     .row {
       display: grid;
       grid-template-columns: subgrid;
-      background: light-dark(#dddddd, #5f5f5f);
+      background: var(--contrast-bg, light-dark(#dddddd, #5f5f5f));
       padding: 2px;
       margin: -2px;
       position: relative;
@@ -319,7 +309,7 @@ const html = `
         right: 4px;
         bottom: 4px;
         line-height: 1em;
-        background: light-dark(#dddddd77, #5f5f5f77);
+        background: oklch(from var(--contrast-bg, light-dark(#dddddd, #5f5f5f)) l c h / 70%);
         border-radius: 2px;
       }
     }
@@ -327,20 +317,9 @@ const html = `
       margin: 43px 0;
       height: 4px;
       position: relative;
-      background: #aaaaaa;
+      background: var(--contrast-fg, #aaaaaa);
       border-radius: 8px;
       display: block;
-    }
-    h2 {
-      font-size: 1rem;
-      margin: 0;
-      grid-column-end: span 2;
-      align-self: center;
-      text-align: end;
-      font-weight: 400;
-      word-break: break-all;
-      max-height: 80px;
-      line-height: 1rem;
     }
     h3 {
       font-size: 0.8rem;
@@ -349,12 +328,12 @@ const html = `
       position: sticky;
       top: 0;
       z-index: 10;
-      background: rgba(255, 255, 255, 0.5);
+      background: oklch(from var(--base-bg, white) l c h / 70%);
       border-radius: 2px;
       width: 100%;
       text-align: center;
     }
-    img {
+    main img {
       box-shadow: 2px 2px 8px 0px #333333;
       height: 90px;
       width: 120px;
@@ -371,6 +350,9 @@ const html = `
   </style>
 </head>
 <body>
+  <header>
+    <a href="https://nleanba.ch/"><img alt="[nleanba.ch]" class="badge" src="https://nleanba.ch/88x31/nleanba-badge.png" width="88" height="31"></a>
+  </header>
   <h1>All Gnome Backgrounds found on GitLab</h1>
   <p>
     This is all backgrounds found in <a href="https://gitlab.gnome.org/GNOME/gnome-backgrounds/">the gnome-backgrounds git repository</a>.
@@ -381,9 +363,6 @@ const html = `
     <br>
     Images link to the original (except for some 2.x backgrounds, but it will at least link to the correct tag)
   </p>
-  <p>
-    Font used is Besley* Condensed by <a href="https://indestructibletype.com/Besley.html">indestructible type*</a>.
-  </p>
   <main>
   <!--<span style="grid-column-end: span 2;"></span>-->
   <h3>${
@@ -393,7 +372,7 @@ const html = `
       .replaceAll("_", ".")
   ).join("</h3><h3>")
 }</h3>
-  ${rows.join("")}
+  ${rows.join("\n")}
   ${"" /* "<div></div>".repeat(2499) */}
   </main>
 </body>
