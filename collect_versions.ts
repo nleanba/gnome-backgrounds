@@ -448,11 +448,10 @@ const html = `
   <link rel="stylesheet" href="https://nleanba.ch/index.css">
   <style>
     div {
-      background: var(--contrast-fg, #aaaaaa);
       border-radius: 8px;
     }
     main {
-      grid-template-columns: repeat(51, 120px);
+      /* grid-template-columns: repeat(51, 120px); */
       display: grid;
       gap: 12px;
       grid-auto-flow: row dense;
@@ -479,6 +478,17 @@ const html = `
         line-height: 1em;
         background: oklch(from var(--contrast-bg, light-dark(#dddddd, #5f5f5f)) l c h / 70%);
         border-radius: 2px;
+      }
+
+      div {
+        background-color: transparent;
+        background-size: 8px 8px;
+        background-image: repeating-linear-gradient(45deg,
+          var(--contrast-fg, light-dark(#aaaaaa, #c5c5c5)) 0,
+          var(--contrast-fg, light-dark(#aaaaaa, #c5c5c5)) 0.9px,
+          transparent 0,
+          transparent 50%);
+        border: 1px solid var(--contrast-fg, light-dark(#aaaaaa, #c5c5c5));
       }
     }
     .group {
@@ -549,7 +559,7 @@ const html = `
       object-fit: cover;
       align-self: center;
       margin: -43px 0;
-      background: black;
+      background: #444444;
       position: sticky;
       left: 4px;
       right: 4px;
