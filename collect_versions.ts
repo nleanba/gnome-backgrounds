@@ -110,24 +110,28 @@ function copyBackgrounds(prev_rev: Tag, rev: Tag) {
   const destination = `./backgrounds-sorted/${format(rev.sortable)}`;
   ensureDirSync(destination);
   let hasFiles = false;
+  hasFiles = true;
   const dittoShortnamesLater: string[] = [];
   for (const file of files) {
     let shortname = file.name
       .replace(/\.[^\.]*$/, "");
-    // .toLocaleLowerCase()
+    //  .toLocaleLowerCase()
     // .replace("gnome-", "")
-    // .replace("symbolics", "symbolic")
+    //  .replace("Symbolics", "symbolics")
     // .replace("-day", "-l")
     // .replace("-night", "-d")
     // .replace("-1", "-l")
     // .replace("-2", "-d");
-    if (shortname === "brushstrokes") {
-      shortname = "brush-strokes-l";
-    } else if (shortname === "blobs") {
-      shortname = "blobs-d";
-    } else if (["brushstrokes", "disco", "vnc", "wood"].includes(shortname)) {
-      shortname += "-l";
-    }
+    // if (shortname === "brushstrokes") {
+    //   shortname = "brush-strokes-l";
+    // } else if (shortname === "blobs") {
+    //   shortname = "blobs-d";
+    // } else if (
+    //   ["disco", "vnc", "wood"].includes(shortname.toLocaleLowerCase())
+    // ) {
+    //   shortname = shortname.toLocaleLowerCase();
+    //   shortname += "-l";
+    // }
     const indexed = index.get(shortname);
     if (changed.includes(file.path.replace("backgrounds-git/", ""))) {
       hasFiles = true;
@@ -192,86 +196,246 @@ for (let index = 1; index < tags.length; index++) {
 // );
 // Deno.writeTextFileSync("index.json", indexArray);
 
-const indexArray = Array.from(index.entries())
-  .sort(([a], [b]) => a.localeCompare(b));
-Deno.writeTextFileSync("index.json", JSON.stringify(indexArray));
+const groups: [string, number, string[]][] = [
+  ["Adwaita", 4, [
+    "adwaita-d",
+    "adwaita-l",
+    "adwaita-day",
+    "adwaita-morning",
+    "adwaita-night",
+    "adwaita-lock",
+    "Locked",
+  ]],
+  ["VNC", 2, ["VNC", "vnc-l", "vnc-d"]],
+  ["Symbolic", 2, [
+    "symbolics-d",
+    "symbolics-l",
+    "symbolics-1",
+    "symbolics-2",
+    "Symbolics-1",
+    "Symbolics-2",
+    "symbolic-d",
+    "symbolic-l",
+  ]],
+  // ["LCD", 4, [
+  //   "lcd-d",
+  //   "lcd-l",
+  //   "lcd-rainbow-d",
+  //   "lcd-rainbow-l",
+  // ]],
+  ["Wood", 2, ["wood-d", "wood-l", "Wood"]],
+  ["Blobs", 2, ["blobs-d", "blobs-l", "Blobs"]],
+  ["BrushStrokes", 2, ["BrushStrokes", "brush-strokes-d", "brush-strokes-l"]],
+  ["Lava", 2, ["Lava", "DepthLava"]],
+  ["Disco", 2, ["Disco", "DiscoHex", "disco-d", "disco-l"]],
+  ["endless-shapes", 1, ["endless-shapes", "Endless-shapes"]],
+  ["Terraform", 3, ["Terraform-blue", "Terraform-green", "Terraform-orange"]],
+  ["Ice", 1, ["Icescape", "Icetwigs", "IceCrystals", "Frosty"]],
+  ["Stripes", 2, ["Stripes", "Stripes34", "oceans"]],
+  ["Spaceflare", 3, ["Spaceflare", "Spaceflare-supernova", "Spaceflare-nova"]],
+  ["Keys", 2, ["keys-l", "keys-d", "licorice-d", "licorice-l"]],
+  // ["Pride", 4, ["pride-d", "pride-l", "progress-d", "progress-l"]],
+  // based on folders in repository
+  // ["abstract", 10, [
+  //   "due",
+  //   "due-alt",
+  //   "intenso-alt",
+  //   "intenso",
+  //   "onda-alt",
+  //   "onda",
+  //   "raggi-alt",
+  //   "raggi",
+  //   "scie-alt",
+  //   "scie",
+  // ]],
+  // ["branded", 6, [
+  //   "GNOME-Aqua",
+  //   "GNOME-Black",
+  //   "GNOME-Hills",
+  //   "GNOME-FraserIsland",
+  //   "GNOME-Redblurred",
+  //   "GNOME-Weirdcolours",
+  //   "GNOME-Curves",
+  //   "FootFall",
+  // ]],
+  // ["tiles", 6, [
+  //   "alien-artifact-trans",
+  //   "cow-trans",
+  //   "greche",
+  //   "leather_skin-resynth-hig",
+  //   "stone-wall",
+  //   "tiles-trans",
+  //   "pattern-boats",
+  //   "pattern-clouds",
+  //   "pattern-stars",
+  // ]],
+  // ["translucent", 6, [
+  //   "ellipsis",
+  //   "grid",
+  //   "masle",
+  //   "rects",
+  //   "tentacles",
+  //   "waves",
+  //   "Flow",
+  //   "Gulp",
+  //   "Silk",
+  //   "Spring",
+  //   "Waves",
+  // ]],
+  // ["nature", 3, [
+  //   "FreshFlower",
+  //   "GreenMeadow",
+  //   "OpenFlower",
+  //   "Aqua",
+  //   "Blinds",
+  //   "Dune",
+  //   "Garden",
+  //   "GreenMeadow",
+  //   "LadyBird",
+  //   "RainDrops",
+  //   "Storm",
+  //   "TwoWings",
+  //   // "Wood",
+  //   "YellowFlower",
+  // ]],
+];
 
-const rows: string[] = [];
-for (const bg of indexArray) {
-  let first: number | undefined;
-  let width = 0;
-  let tiles: {
-    path: string | undefined;
-    gitlab: string | undefined;
-    ditto: number;
-  }[] = [];
-  let bgIndex = 0;
-  for (let index = 0; index < revisions.length; index++) {
-    if (
-      bg[1].length > bgIndex &&
-      bg[1][bgIndex].startsWith(format(revisions[index].sortable))
-    ) {
-      if (bg[1][bgIndex].endsWith("°ditto")) {
-        if (tiles.length) tiles.at(-1)!.ditto++;
-        else {
-          console.log("Uh OH!", bg[0], bg[1][bgIndex]);
-          tiles.push({
-            path: "broken.jpg",
-            gitlab: undefined,
-            ditto: 1,
-          });
+const groupedIndex: Map<string, [string, string[]][]> = new Map();
+for (const [name, images] of index) {
+  let group = groups.find(([_, __, names]) => names.includes(name))?.[0] ??
+    "Uncategorized";
+
+  if (group == "Uncategorized" && /-.$/.test(name)) {
+    group = name.slice(0, name.length - 2);
+  }
+
+  const prev = groupedIndex.get(group);
+  if (prev !== undefined) {
+    groupedIndex.set(group, [...prev, [name, images]]);
+  } else {
+    groupedIndex.set(group, [[name, images]]);
+  }
+}
+
+// const indexArray = Array.from(index.entries())
+//   .sort(([a], [b]) => a.localeCompare(b));
+// Deno.writeTextFileSync("index.json", JSON.stringify(indexArray));
+
+const groupedRows: [number, string][] = [];
+let ungroupedRows: string[] = [];
+for (const [groupName, indexArray] of groupedIndex) {
+  let g_first: number | undefined;
+  let g_last = -1;
+  const rows: string[] = [];
+  for (
+    const bg of Array.from(indexArray).sort(([a], [b]) => a.localeCompare(b))
+  ) {
+    let first: number | undefined;
+    let width = 0;
+    let tiles: {
+      path: string | undefined;
+      gitlab: string | undefined;
+      ditto: number;
+    }[] = [];
+    let bgIndex = 0;
+    for (let index = 0; index < revisions.length; index++) {
+      if (
+        bg[1].length > bgIndex &&
+        bg[1][bgIndex].startsWith(format(revisions[index].sortable))
+      ) {
+        if (bg[1][bgIndex].endsWith("°ditto")) {
+          if (tiles.length) tiles.at(-1)!.ditto++;
+          else {
+            console.log("Uh OH!", bg[0], bg[1][bgIndex]);
+            tiles.push({
+              path: "broken.jpg",
+              gitlab: undefined,
+              ditto: 1,
+            });
+          }
+        } else {
+          tiles.push(
+            {
+              path: `backgrounds-sorted/${bg[1][bgIndex]}`,
+              gitlab:
+                `https://gitlab.gnome.org/GNOME/gnome-backgrounds/-/blob/${
+                  revisions[index].tag
+                }/backgrounds/${
+                  bg[1][bgIndex].replace(/.*\//, "")
+                }?ref_type=tags`,
+              ditto: 1,
+            },
+            // `<img loading="lazy" src="/backgrounds-sorted/${bg[1][bgIndex]}">`,
+          );
         }
-      } else {
+        if (first === undefined) {
+          first = index;
+        }
+        if (g_first === undefined || g_first > first) {
+          g_first = first;
+        }
+        bgIndex++;
+        width++;
+      } else if (first !== undefined) {
         tiles.push(
           {
-            path: `backgrounds-sorted/${bg[1][bgIndex]}`,
-            gitlab: `https://gitlab.gnome.org/GNOME/gnome-backgrounds/-/blob/${
-              revisions[index].tag
-            }/backgrounds/${bg[1][bgIndex].replace(/.*\//, "")}?ref_type=tags`,
+            path: undefined,
+            gitlab: undefined,
             ditto: 1,
           },
-          // `<img loading="lazy" src="/backgrounds-sorted/${bg[1][bgIndex]}">`,
+          // `<div></div>`
         );
+        width++;
       }
-      if (first === undefined) {
-        first = index;
-      }
-      bgIndex++;
-      width++;
-    } else if (first !== undefined) {
-      tiles.push(
-        {
-          path: undefined,
-          gitlab: undefined,
-          ditto: 1,
-        },
-        // `<div></div>`
-      );
-      width++;
     }
-  }
-  const lastIndex = tiles.findLastIndex((t) => t.path !== undefined);
-  width -= tiles.length - lastIndex + 1;
-  tiles = tiles.slice(0, lastIndex + 1);
-  rows.push(
-    //`<div class="row" style="grid-column: ${first};">
-    `<div class="row" style="grid-column: ${first! + 1} / span ${
-      width + 2
-    };" title="${bg[0]}">
+    const lastIndex = tiles.findLastIndex((t) => t.path !== undefined);
+    width -= tiles.length - lastIndex;
+    tiles = tiles.slice(0, lastIndex + 1);
+
+    const end = first! + width + 1;
+    if (end > g_last) {
+      g_last = end;
+    }
+
+    rows.push(
+      //`<div class="row" style="grid-column: ${first};">
+      `<div class="row" style="grid-column: ##${first! + 1}## / span ${
+        width + 1
+      };" title="${bg[0]}">
      ${
-      // `<h2>${bg[0]}</h2>`
-      tiles.map((t) => {
-        if (t.path === undefined) {
-          return `<div style="grid-column: span ${t.ditto};" title="no background with this name for this release"></div>`;
-        }
-        if (t.gitlab === undefined) {
-          return `<a class="bg" style="grid-column: span ${t.ditto};"><img loading="lazy" src="${t.path}.png"></a>`;
-        }
-        // return `<img class="bg" style="grid-column: span ${t.ditto};"  loading="lazy" src="${t.path}">`;
-        return `<a class="bg" href="${t.gitlab}" style="grid-column: span ${t.ditto};"><img loading="lazy" src="${t.path}.png"></a>`;
-      }).join("")}</div>`,
-    // TODO href="https://gitlab.gnome.org/GNOME/gnome-backgrounds/-/blob/42.0/backgrounds/blobs-l.svg?ref_type=tags"
-  );
+        // `<h2>${bg[0]}</h2>`
+        tiles.map((t) => {
+          if (t.path === undefined) {
+            return `<div style="grid-column: span ${t.ditto};" title="no background with this name for this release"></div>`;
+          }
+          if (t.gitlab === undefined) {
+            return `<a class="bg" style="grid-column: span ${t.ditto};"><img loading="lazy" src="${t.path}.png"></a>`;
+          }
+          // return `<img class="bg" style="grid-column: span ${t.ditto};"  loading="lazy" src="${t.path}">`;
+          return `<a class="bg" href="${t.gitlab}" style="grid-column: span ${t.ditto};"><img loading="lazy" src="${t.path}.png"></a>`;
+        }).join("")}</div>`,
+      // TODO href="https://gitlab.gnome.org/GNOME/gnome-backgrounds/-/blob/42.0/backgrounds/blobs-l.svg?ref_type=tags"
+    );
+  }
+
+  if (groupName === "Uncategorized") {
+    ungroupedRows = rows.map((r) => r.replaceAll("##", ""));
+  } else {
+    const height = groups.find(([name]) => name === groupName)?.[1] ?? 2;
+    groupedRows.push([
+      g_first!,
+      `<div class="group" style="grid-column: ${g_first! + 1} / ${
+        g_last + 1
+      }; grid-row-end: span ${height};" title="${groupName}">${
+        rows.map((r) =>
+          r.replace(
+            /##\d+##/,
+            (first) => `${parseInt(first.replaceAll("##", ""), 10) - g_first!}`,
+          )
+        ).join("\n")
+      }</div>`,
+    ]);
+  }
 }
 
 const html = `
@@ -288,12 +452,16 @@ const html = `
       border-radius: 8px;
     }
     main {
-      grid-template-columns: repeat(49, 120px);
+      grid-template-columns: repeat(51, 120px);
       display: grid;
       gap: 12px;
       grid-auto-flow: row dense;
       max-width: unset;
       font-stretch: 75%;
+
+      h3:last-of-type {
+        margin-right: 16px;
+      }
     }
     .row {
       display: grid;
@@ -311,6 +479,45 @@ const html = `
         line-height: 1em;
         background: oklch(from var(--contrast-bg, light-dark(#dddddd, #5f5f5f)) l c h / 70%);
         border-radius: 2px;
+      }
+    }
+    .group {
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-template-rows: subgrid;
+      grid-auto-flow: row dense;
+      gap: 12px;
+      background-color: transparent;
+      background-size: 4px 4px;
+      /* background-image: repeating-linear-gradient(45deg,
+        var(--contrast-fg, light-dark(#aaaaaa, #c5c5c5)) 0,
+        var(--contrast-fg, light-dark(#aaaaaa, #c5c5c5)) 0.9px,
+        transparent 0,
+        transparent 50%); */
+      border: 1px solid var(--contrast-fg, light-dark(#aaaaaa, #c5c5c5));
+      padding: 4px;
+      margin: -4px;
+      position: relative;
+
+      &[title="Adwaita"] {
+        grid-row-start: 2;
+      }
+
+      &::before {
+        color: var(--contrast-fg, light-dark(#aaaaaa, #c5c5c5));
+        /* content: attr(title); */
+        position: absolute;
+        left: 4px;
+        bottom: 4px;
+        line-height: 1em;
+        background: var(--base-bg, light-dark(white, black));
+        border-radius: 2px;
+        padding: 2px;
+      }
+
+      & > .row {
+        margin: -4px;
+        padding: 4px;
       }
     }
     .bg {
@@ -372,7 +579,8 @@ const html = `
       .replaceAll("_", ".")
   ).join("</h3><h3>")
 }</h3>
-  ${rows.join("\n")}
+  ${groupedRows.sort(([a], [b]) => a - b).map(([_, grp]) => grp).join("\n")}
+  ${ungroupedRows.join("\n")}
   ${"" /* "<div></div>".repeat(2499) */}
   </main>
 </body>
