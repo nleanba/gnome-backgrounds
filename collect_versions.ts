@@ -23,6 +23,7 @@ function getTags(): Tag[] {
         .replaceAll("GNOME_BACKRGROUNDS_", "")
         .replaceAll("GNOME_BACKGROUNDS_", "")
         .replaceAll("_", ".")
+        .replaceAll("alpha.", "alpha-")
         .split(".");
       if (/[a-z]/.test(to_parse.at(-1)!)) {
         const last = "0-" + to_parse.pop()!;
@@ -554,6 +555,7 @@ const html = `
       box-shadow: 2px 2px 8px 0px #333333;
       height: 90px;
       width: 120px;
+      max-width: 120px;
       display: block;
       border-radius: 8px;
       object-fit: cover;
@@ -563,6 +565,7 @@ const html = `
       position: sticky;
       left: 4px;
       right: 4px;
+      image-rendering: unset;
     }
   </style>
 </head>
